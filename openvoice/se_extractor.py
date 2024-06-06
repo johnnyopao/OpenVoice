@@ -16,10 +16,10 @@ from whisper_timestamped.transcribe import get_audio_tensor, get_vad_segments
 model_size = "medium"
 # Run on GPU with FP16
 model = None
-def split_audio_whisper(audio_path, audio_name, target_dir='processed'):
+def split_audio_whisper(audio_path, audio_name, target_dir='processed', device='cpu'):
     global model
     if model is None:
-        model = WhisperModel(model_size, device="cuda", compute_type="float16")
+        model = WhisperModel(model_size, device=device, compute_type="int8")
     audio = AudioSegment.from_file(audio_path)
     max_len = len(audio)
 
@@ -143,7 +143,7 @@ def get_se(audio_path, vc_model, target_dir='processed', vad=True):
     if vad:
         wavs_folder = split_audio_vad(audio_path, target_dir=target_dir, audio_name=audio_name)
     else:
-        wavs_folder = split_audio_whisper(audio_path, target_dir=target_dir, audio_name=audio_name)
+        wavs_folder = split_audio_whisper(audio_path, target_dir=target_dir, audio_name=audio_name, device=device)
     
     audio_segs = glob(f'{wavs_folder}/*.wav')
     if len(audio_segs) == 0:
